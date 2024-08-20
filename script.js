@@ -23,16 +23,30 @@ const PlayGame = (function(){
     let currentPlayer;
     let winner;
     let finalMessage;
+    const status = document.querySelector('#status');
+    currentPlayer = players[0];
+    status.textContent = `${currentPlayer.name}'s turn`;
 
-    while(!winCheck()) {
-        currentPlayer = (currentPlayer === players[0])? players[1] : players[0];
-        const slot = +prompt(`${currentPlayer.name}'s turn`);
+    const resetBtn = document.querySelector('button');
+    resetBtn.addEventListener('click', resetGame);
+
+    const domBoard = document.getElementById('board');
+    domBoard.addEventListener('click', boardListener)
+
+    function boardListener(e) {
+        const slot = parseInt(e.target.id);
         const currentBoard = GameBoard.getBoard();
         if(currentBoard[slot] !== null) {
-            console.log('Pick an unpicked number between 0 and 8')
-            continue;
+            return;
         }
         GameBoard.markSlot(slot, currentPlayer.symbol);
+        document.getElementById(e.target.id).innerText = currentPlayer.symbol;
+        if(winCheck()) {
+            declareResult();
+            return;
+        }
+        currentPlayer = (currentPlayer === players[0])? players[1] : players[0];
+        status.textContent = `${currentPlayer.name}'s turn`;
     }
 
     function winCheck() {
@@ -51,13 +65,19 @@ const PlayGame = (function(){
         return winner;
     }
 
-    if(winner === players[0] || winner === players[1]) {
-        finalMessage = `${winner.name} wins the game!`
-    } else if(winner === 'tie') {
-        finalMessage = "Can you believe it? It's a tie!"
-    } else {
-        finalMessage = "There was an error in the game"
+    function declareResult() {
+        domBoard.removeEventListener('click', boardListener);
+        if(winner === players[0] || winner === players[1]) {
+            finalMessage = `${winner.name} wins the game!`
+        } else if(winner === 'tie') {
+            finalMessage = "Can you believe it? It's a tie!"
+        } else {
+            finalMessage = "There was an error in the game"
+        }
+        status.textContent = finalMessage;
     }
 
-    console.log(finalMessage)
+    function resetGame() {
+        location.reload()
+    }
 })()
